@@ -99,8 +99,12 @@ def stylegan2(G, D, aug, fake_labels, real_images, real_labels, r1_gamma=10, pl_
     # Non-saturating logistic loss from "Generative Adversarial Nets".
     with tf.name_scope('Loss_main'):
         G_loss = tf.nn.softplus(-D_fake.scores) # -log(sigmoid(D_fake.scores)), pylint: disable=invalid-unary-operand-type
-        D_loss = tf.nn.softplus(D_fake.scores) # -log(1 - sigmoid(D_fake.scores))
-        D_loss += tf.nn.softplus(-D_real.scores) # -log(sigmoid(D_real.scores)), pylint: disable=invalid-unary-operand-type
+        D_loss1 = tf.nn.softplus(D_fake.scores) # -log(1 - sigmoid(D_fake.scores))
+        D_loss2 = tf.nn.softplus(-D_real.scores) # -log(sigmoid(D_real.scores)), pylint: disable=invalid-unary-operand-type
+        
+        K=1e3 # ابرپارامتر
+        D_loss=  ( np.absolute(D_loss1-D_loss2) / np.absolute(D_fake-D_real) ) - K
+        
         G_reg = 0
         D_reg = 0
 
